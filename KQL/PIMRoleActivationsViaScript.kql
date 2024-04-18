@@ -1,0 +1,4 @@
+AuditLogs
+| where AADOperationType == "ActivateRole"
+| evaluate sliding_window_counts(AADOperationType,TimeGenerated,ago(14d),now(),5m,5m,Identity)
+| where Count >= 5
