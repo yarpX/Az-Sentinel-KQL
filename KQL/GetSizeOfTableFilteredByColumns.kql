@@ -3,4 +3,4 @@ OfficeActivity  //table to evaluate
 | where OfficeWorkload == "Exchange" //Qualifier
 | where Operation == "Move" //Qualifier
 | extend TotalSize = estimate_data_size(*)  //this is the function that matters, the rest are variable
-| summarize Total = (sum(TotalSize) / 1000000) //Output is in bytes, so divide by 1M to get megabytes (MB)
+| summarize Total = (sum(TotalSize)) / 1000000 //Output is in bytes, so divide by 1M to get megabytes (MB)
