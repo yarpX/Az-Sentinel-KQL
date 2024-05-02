@@ -1,0 +1,12 @@
+let AnomalyThreshold = 2;
+let AnomalySizeThresholdGB = 1;
+Usage
+| where TimeGenerated between (startofday(ago(60d)) .. startofday(now()))
+| where IsBillable == "true"
+| make-series ActualUsage = sum(Quantity) default = 0 on TimeGenerated from startofday(ago(60d)) to startofday(ago(1d)) step 1d by DataType
+| extend (Anomalies, AnomalyScore, ExpectedUsage) = series_decompose_anomalies(ActualUsage)
+| mv-expand ActualUsage to typeof(long), TimeGenerated to typeof(datetime), Anomalies to typeof(double), AnomalyScore to typeof(double), ExpectedUsage to typeof(long)
+| where Anomalies != 0 and (AnomalyScore > AnomalyThreshold or AnomalyScore < (AnomalyThreshold * -1)) and (abs(ActualUsage - ExpectedUsage) > (AnomalySizeThresholdGB * 1000)) //Check thresholds
+| project TimeGenerated, AnomalyScore, DataType, Difference = abs((ExpectedUsage - ActualUsage)/1000)
+// You could also render a column chart here
+| summarize count() by DataType
