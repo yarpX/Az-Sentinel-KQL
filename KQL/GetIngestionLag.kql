@@ -1,0 +1,6 @@
+<TableName>
+| where TimeGenerated > ago(8h)
+| extend IngestionLatencyMin = todouble(datetime_diff("Second",ingestion_time(),TimeGenerated))/60 
+| extend AgentLatencyMin = todouble(datetime_diff("Second",_TimeReceived,TimeGenerated))/60 
+| summarize percentiles(IngestionLatencyMin,90), percentiles(AgentLatencyMin,90) by bin(TimeGenerated,10m) 
+| render timechart
